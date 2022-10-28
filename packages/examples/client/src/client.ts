@@ -33,19 +33,30 @@ buildWorkerDefinition('dist', new URL('', window.location.href).href, false);
 
 // register Monaco languages
 monaco.languages.register({
-    id: 'json',
-    extensions: ['.json', '.bowerrc', '.jshintrc', '.jscsrc', '.eslintrc', '.babelrc'],
-    aliases: ['JSON', 'json'],
-    mimetypes: ['application/json']
+    id: 'python',
+    aliases: ['python', 'py'],
+    extensions: ['.py'],
 });
+console.error(monaco.languages.getLanguages());
 
 // create Monaco editor
-const value = `{
-    "$schema": "http://json.schemastore.org/coffeelint",
-    "line_endings": "unix"
-}`;
-monaco.editor.create(document.getElementById('container')!, {
-    model: monaco.editor.createModel(value, 'json', monaco.Uri.parse('inmemory://model.json')),
+const value = `
+import numpy
+import pandas
+
+stuff = list([1, 2, 3])
+`;
+
+monaco.editor.create(document.getElementById('container1')!, {
+    model: monaco.editor.createModel(value, 'python', monaco.Uri.parse('inmemory://model1.py')),
+    glyphMargin: true,
+    lightbulb: {
+        enabled: true
+    }
+});
+
+monaco.editor.create(document.getElementById('container2')!, {
+    model: monaco.editor.createModel(value, 'python', monaco.Uri.parse('inmemory://model2.py')),
     glyphMargin: true,
     lightbulb: {
         enabled: true
@@ -58,6 +69,7 @@ MonacoServices.install();
 // create the web socket
 const url = createUrl('localhost', 3000, '/sampleServer');
 const webSocket = new WebSocket(url);
+window.webSocket = webSocket
 
 webSocket.onopen = () => {
     const socket = toSocket(webSocket);
@@ -72,11 +84,12 @@ webSocket.onopen = () => {
 };
 
 function createLanguageClient (transports: MessageTransports): MonacoLanguageClient {
+    console.error('foobar');
     return new MonacoLanguageClient({
         name: 'Sample Language Client',
         clientOptions: {
             // use a language id as a document selector
-            documentSelector: ['json'],
+            documentSelector: ['python'],
             // disable the default error handler
             errorHandler: {
                 error: () => ({ action: ErrorAction.Continue }),
